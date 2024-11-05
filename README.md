@@ -34,6 +34,15 @@ FlashAttention-2 does not support computing attention scores with padding tokens
 
 The larger sequence lengths you have , the more speedups you get.
 
+For example, with a relatively small sequence length (prompt_max_kength=256),  and a padding ratio of 0.3 (30% of the input is filled with padding tokens) a single forward pass creates overhead leading to a small speedup
+![Screenshot](smal_seq_length_with_padd.PNG)
+
+But for larger sequence lengths (prompt_max_kength=2048 and keeping a padding ratio of 0.3 ), you can expect even more speedup benefits. Besides, FlashAttention is more memory efficient, meaning you can train on much larger sequence lengths without running into out-of-memory issues.
+![Screenshot](larg_seq_length.PNG)
+
+And if Flash attention is well  used with large sequences and without padding, we can have more speedup benefits (up to *2). check-out the speeedups here on the same model for larger sequence lengths (prompt_max_kength=4096) and  a padding ratio of 0.
+![Screenshot](ideal_situation.PNG)
+
 
 
 - BetterTransformer :
