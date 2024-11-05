@@ -45,5 +45,20 @@ And if Flash attention is well  used with large sequences and without padding, w
 
 
 
+- PyTorch scaled dot product attention :
+ SDPA support is currently being added natively in Transformers and is used by default for torch>=2.1.1 when an implementation is available. You may also set ```attn_implementation="sdpa"``` in from_pretrained() to explicitly request SDPA to be used
+
+ 
 - BetterTransformer :
+
+Some BetterTransformer features are being upstreamed to Transformers with default support for native SDPA; BetterTransformer still has a wider coverage than the Transformers SDPA integration, but you can expect more and more architectures to natively support SDPA in Transformers.
+
+BetterTransformer accelerates inference with its fastpath (native PyTorch specialized implementation of Transformer functions) execution.
+
+BetterTransformer two optimizations in the fastpath execution (fusion and skipping the inherent sparsity of padding tokens). It also converts all attention operations to use the more memory-efficient scaled dot product attention (SDPA), and it calls optimized kernels like FlashAttention under the hood.
+
+Make sure you have 🤗 Optimum installed. Then you can enable BetterTransformer with :
+```model = model.to_bettertransformer()```
+
+
 - Quantization with bitsandbytes :
