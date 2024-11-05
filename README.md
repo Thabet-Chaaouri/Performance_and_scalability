@@ -63,3 +63,38 @@ Make sure you have 🤗 Optimum installed. Then you can enable BetterTransformer
 
 
 - Quantization with bitsandbytes :
+
+Quantization reduces your model size compared to its native full precision version, making it easier to fit large models onto GPUs with limited memory.  It supports 4-bit and 8-bit quantization.
+
+If you’re loading a model in 8-bit for text generation, you should use the generate() method instead of the Pipeline function which is not optimized for 8-bit models and will be slower. You should also place all inputs on the same device as the model.
+
+- Combine optimizations :
+
+It is often possible to combine several of the optimization techniques.  For example, you can load a model in 4-bit, and then enable BetterTransformer with FlashAttention:
+
+```
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
+# load model in 4-bit
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
+tokenizer = AutoTokenizer.from_pretrained("facebook/opt-350m")
+model = AutoModelForCausalLM.from_pretrained("facebook/opt-350m", quantization_config=quantization_config)
+
+# enable BetterTransformer
+model = model.to_bettertransformer()
+
+input_text = "Hello my dog is cute and"
+inputs = tokenizer(input_text, return_tensors="pt").to("cuda")
+
+# enable FlashAttention
+with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):
+    outputs = model.generate(**inputs)
+
+print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+```
+
