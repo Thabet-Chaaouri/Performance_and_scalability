@@ -26,5 +26,15 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
+FlashAttention-2 can only be used when the model’s dtype is fp16 or bf16.
+
+FlashAttention-2 can be combined with other optimization techniques like quantization (with 8-bit or 4-bit) to further speedup inference.
+
+FlashAttention-2 does not support computing attention scores with padding tokens. To overcome this, you should use FlashAttention-2 without padding tokens in the sequence during training (by packing a dataset or concatenating sequences until reaching the maximum sequence length).
+
+The larger sequence lengths you have , the more speedups you get.
+
+
+
 - BetterTransformer :
 - Quantization with bitsandbytes :
