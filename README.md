@@ -46,6 +46,7 @@ And if Flash attention is well  used with large sequences and without padding, w
 
 
 - PyTorch scaled dot product attention :
+
  SDPA support is currently being added natively in Transformers and is used by default for torch>=2.1.1 when an implementation is available. You may also set ```attn_implementation="sdpa"``` in from_pretrained() to explicitly request SDPA to be used
 
  
