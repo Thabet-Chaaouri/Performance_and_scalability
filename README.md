@@ -6,7 +6,18 @@ Use a GPU, and optimize inference with:
 
 - Flash-attention :
 
+The standard attention:
+
+X=(x1,...xN) is the input sequence to the attention layer. The projections Q and K will each consist of N vectors resulting in the QTranspose(K) being of size NN. LLMs usually have multiple attention heads, thus doing multiple self-attention computations in parallel. Assuming, the LLM has 40 attention heads and runs in bfloat16 precision, we can calculate the memory requirement to store the QTranspose(K) matrices to be 40∗2∗N*N bytes. For N=1000 only around 50 MB of VRAM are needed, however, for N=16000 we would need 19 GB of VRAM, and for N=100,000 we would need almost 1TB just to store the QTranspose(K) matrices
+
+Improvements :
+
 FlashAttention-2 is a faster and more efficient implementation of the standard attention mechanism that can significantly speedup inference and transform its complexity from quadratic to linear.
+By keeping track of softmax normalization statistics and by using some smart mathematics, Flash Attention gives numerical identical outputs compared to the default self-attention layer at a memory cost that only increases linearly with N (the sequence length).
+
+Looking at the formula, one would intuitively say that Flash Attention must be much slower compared to the default self-attention formula as more computation needs to be done. Indeed Flash Attention requires more FLOPs compared to normal attention as the softmax normalization statistics have to constantly be recomputed. However, Flash Attention is much faster in inference compared to default attention which comes from its ability to significantly reduce the demands on the slower, high-bandwidth memory of the GPU (VRAM), focusing instead on the faster on-chip memory (SRAM). Essentially, Flash Attention makes sure that all intermediate write and read operations can be done using the fast on-chip SRAM memory instead of having to access the slower VRAM memory to compute the output vector O.
+
+In practice, there is currently absolutely no reason to not use Flash Attention if available. The algorithm gives mathematically the same outputs, and is both faster and more memory-efficient.
 
 On Nvidia, we have to install flash attention:
 ```pip install flash-attn --no-build-isolation```
