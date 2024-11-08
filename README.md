@@ -164,7 +164,7 @@ The input and output length impacts directly the performances. Additional input 
 
 Several techniques are available to optimize LLM inference : 
 - Operator Fusion: Combining different adjacent operators together often results in better latency.
-- Quantization: Activations and weights are compressed to use a smaller number of bits.
+- Quantization: Activations and weights are compressed to use a smaller number of bits. it is important to remember that model quantization trades improved memory efficiency against accuracy and in some cases inference time.
 - Compression: Sparsity or Distillation.
 - Parallelization: Tensor parallelism across multiple devices or pipeline parallelism for larger models.
 - KV (key-value) caching : Each token attends to all previously seen tokens, and thus recomputes many of the same values as each new token is generated. For example, while generating the Nth token, the (N-1)th token attends to (N-2)th, (N-3)th … 1st tokens. Similarly, while generating (N+1)th token, attention for the Nth token again needs to look at the (N-1)th, (N-2)th, (N-3)th, … 1st tokens. KV caching, i.e., saving of intermediate keys/values for the attention layers, is used to preserve those results for later reuse, avoiding repeated computation.
