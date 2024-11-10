@@ -175,9 +175,23 @@ The input and output length impacts directly the performances. Additional input 
 
 Several techniques are available to optimize LLM inference : 
 - Operator Fusion: Combining different adjacent operators together often results in better latency.
+
 - Quantization: Activations and weights are compressed to use a smaller number of bits. it is important to remember that model quantization trades improved memory efficiency against accuracy and in some cases inference time.
+  
 - Compression: Sparsity or Distillation.
+  
 - Parallelization: Tensor parallelism across multiple devices or pipeline parallelism for larger models.
-- KV (key-value) caching : Each token attends to all previously seen tokens, and thus recomputes many of the same values as each new token is generated. For example, while generating the Nth token, the (N-1)th token attends to (N-2)th, (N-3)th … 1st tokens. Similarly, while generating (N+1)th token, attention for the Nth token again needs to look at the (N-1)th, (N-2)th, (N-3)th, … 1st tokens. KV caching, i.e., saving of intermediate keys/values for the attention layers, is used to preserve those results for later reuse, avoiding repeated computation.
+  
+- KV (key-value) caching :
+
+Each token attends to all previously seen tokens, and thus recomputes many of the same values as each new token is generated. For example, while generating the Nth token, the (N-1)th token attends to (N-2)th, (N-3)th … 1st tokens. Similarly, while generating (N+1)th token, attention for the Nth token again needs to look at the (N-1)th, (N-2)th, (N-3)th, … 1st tokens. KV caching, i.e., saving of intermediate keys/values for the attention layers, is used to preserve those results for later reuse, avoiding repeated computation.
+
+Using the key-value cache has two advantages, First, Significant increase in computational efficiency as less computations are performed compared to computing the full self attention computation. This leads to an increase in inference speed. Second, the maximum required memory is not increased quadratically with the number of generated tokens, but only increases linearly.
+
+While the required peak memory for the QTranspose(K) matrix is significantly reduced, holding the key-value cache in memory can become very memory expensive for long input sequences or multi-turn chat. Researchers have proposed two methods that allow to significantly reduce the memory cost of storing the key-value cache. The Multi-Query-Attention (MQA) showed that instead of using n_head key-value projections weights, one can use a single head-value projection weight pair that is shared across all attention heads without that the model’s performance significantly degrades. There is also the Grouped-Query-Attention (GQA) that argues that more model performance can be kept by less drastically reducing the number of query head projection weights. Instead of using just a single key-value projection weight, n < n_head key-value projection weights should be used. 
+
+One should always make use of the key-value cache as it leads to identical results and a significant speed-up for longer input sequences. Transformers has the key-value cache enabled by default when making use of the text pipeline or the generate method.
+
+
 
 
